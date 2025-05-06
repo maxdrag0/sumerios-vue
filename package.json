@@ -1,0 +1,99 @@
+{
+  "name": "sumerios",
+  "version": "0.6.4",
+  "description": "Adninistration Software",
+  "main": "./out/main/index.js",
+  "author": "< MAD />",
+  "homepage": "https://electron-vite.org",
+  "scripts": {
+    "format": "prettier --write .",
+    "lint": "eslint . --ext .js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --fix",
+    "start": "electron-vite preview",
+    "dev": "electron-vite dev",
+    "build": "electron-vite build",
+    "postinstall": "electron-builder install-app-deps",
+    "build:portable": "npm run clean && npm run build && electron-builder --win portable",
+    "build:unpack": "npm run build && electron-builder --dir",
+    "build:win": "npm run build && electron-builder --win",
+    "build:mac": "npm run build && electron-builder --mac",
+    "build:linux": "npm run build && electron-builder --linux",
+    "clean": "rimraf dist",
+    "electron:build": "npm run clean && npm run build && electron-builder",
+    "pretty": "prettier --write \"./**/*.{js,jsx,json,ts,tsx,vue}\""
+  },
+  "dependencies": {
+    "@electron-toolkit/preload": "^3.0.1",
+    "@electron-toolkit/utils": "^3.0.0",
+    "axios": "^1.7.9",
+    "bootstrap": "^5.3.3",
+    "decimal.js": "^10.5.0",
+    "electron-context-menu": "^4.0.5",
+    "pinia": "^2.3.0",
+    "standard": "^17.1.2",
+    "vue-router": "^4.5.0",
+    "vue3-toastify": "^0.2.8"
+  },
+  "devDependencies": {
+    "@electron-toolkit/eslint-config": "^1.0.2",
+    "@rushstack/eslint-patch": "^1.10.3",
+    "@vitejs/plugin-vue": "^5.0.5",
+    "@vue/eslint-config-prettier": "^9.0.0",
+    "electron": "^31.0.2",
+    "electron-builder": "^24.13.3",
+    "electron-vite": "^2.3.0",
+    "eslint": "^8.57.0",
+    "eslint-plugin-vue": "^9.26.0",
+    "prettier": "^3.3.2",
+    "rimraf": "^6.0.1",
+    "vite": "^5.3.1",
+    "vue": "^3.4.30"
+  },
+  "eslintConfig": {
+    "extends": "standard"
+  },
+  "build": {
+    "appId": "com.mad.sumerios",
+    "productName": "Sumerios",
+    "files": [
+      "resources/**/*",
+      "out/**/*",
+      "src/**/*",
+      "node_modules/**/*",
+      "package.json"
+    ],
+    "win": {
+      "icon": "resources/sumerios256.ico",
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64",
+            "ia32"
+          ]
+        },
+        {
+          "target": "portable",
+          "arch": [
+            "x64",
+            "ia32"
+          ]
+        }
+      ]
+    },
+    "mac": {
+      "icon": "/resources/sumerios256.ico"
+    },
+    "linux": {
+      "icon": "/resources/sumerios256.ico"
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "deleteAppDataOnUninstall": true,
+      "shortcutName": "Sumerios"
+    }
+  }
+}

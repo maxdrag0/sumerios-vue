@@ -1,0 +1,7 @@
+node_modules
+dist
+out
+.DS_Store
+*.log*
+resources/backend/sumerios-0.0.3.jar
+src/renderer/src/config.js
