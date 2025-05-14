@@ -4,133 +4,186 @@
       <BotonConsorcio />
     </div>
     <div v-if="consorcioStore.selectedConsorcio">
-      <h2 style="color: black; font-weight: bold; font-size: 15px">
+      <h2 style="text-align: center; margin-top: 1rem; color: black; font-weight: bold; font-size: 15px">
         Liquidando período -> {{ intermediaStore.selectedIntermedia?.periodo }}
       </h2>
     </div>
-    <div class="tablas-container">
-      <!-- Tabla de Egresos -->
-      <div class="tabla">
-        <h2>EGRESOS</h2>
-        <table>
-          <thead>
-            <tr>
-              <th>Fecha</th>
-              <th>Titulo</th>
-              <th>Proveedor</th>
-              <th>Total Final</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-if="egresos.length === 0">
-              <td colspan="4" class="text-center" style="font-size: larger">
-                No hay egresos cargados en el período.
-              </td>
-            </tr>
-            <tr v-for="egreso in egresos" :key="egreso.idEgreso">
-              <td>{{ egreso.fecha }}</td>
-              <td>{{ egreso.titulo }}</td>
-              <td>{{ obtenerNombreProveedor(egreso.idProveedor) }}</td>
-              <td style="text-align: right">${{ egreso.totalFinal }}</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
 
-      <!-- Tabla de Gastos Particulares -->
-      <div class="tabla">
-        <h2>GASTOS PARTICULARES</h2>
-        <table>
-          <thead>
-            <tr>
-              <th>Fecha</th>
-              <th>Titulo</th>
-              <th>Proveedor</th>
-              <th>Unidad Funcional</th>
-              <th>Total Final</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-if="gastosParticulares.length === 0">
-              <td colspan="5" class="text-center" style="font-size: larger">
-                No hay gastos particulares cargados en el período.
-              </td>
-            </tr>
-            <tr v-else v-for="gasto in gastosParticulares" :key="gasto.idGastoParticular">
-              <td>{{ gasto.fecha }}</td>
-              <td>{{ gasto.titulo }}</td>
-              <td>{{ obtenerNombreProveedor(gasto.idProveedor) }}</td>
-              <td>
-                {{ obtenerUnidadFuncional(gasto.idUf) }} -
-                {{ obtenerApellidoPropietario(gasto.idUf) }}
-              </td>
-              <td>${{ gasto.totalFinal }}</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-
-      <!-- Tabla de Pagos UF -->
-      <div class="tabla">
-        <h2>PAGOS DE EXPENSA</h2>
-        <table>
-          <thead>
-            <tr>
-              <th>Fecha</th>
-              <th>Unidad Funcional</th>
-              <th>Forma de pago</th>
-              <th>Valor</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-if="pagosUf.length === 0">
-              <td colspan="4" class="text-center" style="font-size: larger">
-                No hay pagos registrados en el período.
-              </td>
-            </tr>
-            <tr v-else v-for="pago in pagosUf" :key="pago.idPagoUf">
-              <td>{{ pago.fecha }}</td>
-              <td>
-                {{ obtenerUnidadFuncional(pago.idUf) }} -
-                {{ obtenerApellidoPropietario(pago.idUf) }}
-              </td>
-              <td>{{ pago.formaPago }}</td>
-              <td>${{ pago.valor }}</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-
-      <!-- Tabla de Ingresos -->
-      <div class="tabla">
-        <h2>INGRESOS</h2>
-        <table>
-          <thead>
-            <tr>
-              <th>Fecha</th>
-              <th>Título</th>
-              <th>Proveedor</th>
-              <th>Valor</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-if="ingresos.length === 0">
-              <td colspan="4" class="text-center" style="font-size: larger">
-                No hay ingresos cargados en el período.
-              </td>
-            </tr>
-            <tr v-else v-for="ingreso in ingresos" :key="ingreso.idIngreso">
-              <td>{{ ingreso.fecha }}</td>
-              <td>{{ ingreso.titulo }}</td>
-              <td>{{ obtenerNombreProveedor(ingreso.idProveedor) }}</td>
-              <td>${{ ingreso.valor }}</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+    <div @click="mostrarMovimientos = !mostrarMovimientos" class="toggle-movimientos">
+      MOVIMIENTOS
+      <span v-if="mostrarMovimientos">▼</span>
+      <span v-else>▶</span>
     </div>
+    <transition name="fade">
+      <div v-show="mostrarMovimientos" class="tablas-container">
+        <!-- Tabla de Egresos -->
+        <div class="tabla">
+          <h2>EGRESOS</h2>
+          <table>
+            <thead>
+              <tr>
+                <th>Fecha</th>
+                <th>Titulo</th>
+                <th>Proveedor</th>
+                <th>Total Final</th>
+                <th>&nbsp;</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-if="egresos.length === 0">
+                <td colspan="4" class="text-center" style="font-size: larger">
+                  No hay egresos cargados en el período.
+                </td>
+              </tr>
+              <tr v-for="egreso in egresos" :key="egreso.idEgreso">
+                <td>{{ egreso.fecha }}</td>
+                <td>{{ egreso.titulo }}</td>
+                <td>{{ obtenerNombreProveedor(egreso.idProveedor) }}</td>
+                <td style="text-align: right">{{ currency(egreso.totalFinal) }}</td>
+                <td>
+                  <button class="boton-eliminar" @click="eliminarEgreso(egreso.idEgreso)">
+                    X
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Tabla de Gastos Particulares -->
+        <div class="tabla">
+          <h2>GASTOS PARTICULARES</h2>
+          <table>
+            <thead>
+              <tr>
+                <th>Fecha</th>
+                <th>Titulo</th>
+                <th>Proveedor</th>
+                <th>Unidad Funcional</th>
+                <th>Total Final</th>
+                <th>&nbsp;</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-if="gastosParticulares.length === 0">
+                <td colspan="5" class="text-center" style="font-size: larger">
+                  No hay gastos particulares cargados en el período.
+                </td>
+              </tr>
+              <tr v-else v-for="gasto in gastosParticulares" :key="gasto.idGastoParticular">
+                <td>{{ gasto.fecha }}</td>
+                <td>{{ gasto.titulo }}</td>
+                <td>{{ obtenerNombreProveedor(gasto.idProveedor) }}</td>
+                <td>
+                  {{ obtenerUnidadFuncional(gasto.idUf) }} -
+                  {{ obtenerApellidoPropietario(gasto.idUf) }}
+                </td>
+                <td>{{ currency(gasto.totalFinal) }}</td>
+                <td>
+                  <button class="boton-eliminar" @click="eliminarGastoParticular(gasto.idGastoParticular)">
+                    X
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Tabla de Pagos UF -->
+        <div class="tabla">
+          <h2>PAGOS DE EXPENSA</h2>
+          <table>
+            <thead>
+              <tr>
+                <th>Fecha</th>
+                <th>Unidad Funcional</th>
+                <th>Forma de pago</th>
+                <th>Valor</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-if="pagosUf.length === 0">
+                <td colspan="4" class="text-center" style="font-size: larger">
+                  No hay pagos registrados en el período.
+                </td>
+              </tr>
+              <tr v-else v-for="pago in pagosUf" :key="pago.idPagoUf">
+                <td>{{ pago.fecha }}</td>
+                <td>
+                  {{ obtenerUnidadFuncional(pago.idUf) }} -
+                  {{ obtenerApellidoPropietario(pago.idUf) }}
+                </td>
+                <td>{{ pago.formaPago }}</td>
+                <td>{{ currency(pago.valor) }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Tabla de Ingresos -->
+        <div class="tabla">
+          <h2>INGRESOS</h2>
+          <table>
+            <thead>
+              <tr>
+                <th>Fecha</th>
+                <th>Título</th>
+                <th>Proveedor</th>
+                <th>Valor</th>
+                <th>&nbsp;</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-if="ingresos.length === 0">
+                <td colspan="4" class="text-center" style="font-size: larger">
+                  No hay ingresos cargados en el período.
+                </td>
+              </tr>
+              <tr v-else v-for="ingreso in ingresos" :key="ingreso.idIngreso">
+                <td>{{ ingreso.fecha }}</td>
+                <td>{{ ingreso.titulo }}</td>
+                <td>{{ obtenerNombreProveedor(ingreso.idProveedor) }}</td>
+                <td>{{ currency(ingreso.valor) }}</td>
+                <td>
+                  <button class="boton-eliminar" @click="eliminarIngreso(ingreso.idIngreso)">
+                    X
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </transition>
+
+    <div @click="mostrarNota = !mostrarNota" class="toggle-movimientos">
+      NOTA
+      <span v-if="mostrarNota">▼</span>
+      <span v-else>▶</span>
+    </div>
+    <transition name="fade">
+      <div v-show="mostrarNota" class="nota">
+      </div>
+    </transition>
+
+
+    <div @click="mostrarJuicios = !mostrarJuicios" class="toggle-movimientos">
+      JUICIOS
+      <span v-if="mostrarJuicios">▼</span>
+      <span v-else>▶</span>
+    </div>
+    <transition name="fade">
+      <div v-show="mostrarJuicios" class="juicios">
+      </div>
+    </transition>
+
+
     <div class="detalle-expensas">
-      <div>
+      <div class="repetir">
+        <h3>Desea crear los mismos egresos para el próximo período? Luego podrá editarlos.</h3>
+        <input type="checkbox" v-model="expensa.repetirEgresos" />
+      </div>
+      <div class="intereses">
         <h3>Intereses por mora:</h3>
         <input
           type="number"
@@ -138,13 +191,28 @@
           placeholder="Porcentaje de intereses"
           min="0"
           step="0.01"
+          style="text-align: center;"
         />
       </div>
+    </div>
+    <div class="detalle-expensas">
       <div class="repetir">
-        <h3>Desea crear los mismos egresos para el próximo período? Luego podrá editarlos.</h3>
-        <input type="checkbox" v-model="expensa.repetirEgresos" />
+        <h3>Segundo Vencimiento.</h3>
+        <input type="checkbox" v-model="expensa.segundoVencimiento" />
+      </div>
+      <div v-show="expensa.segundoVencimiento" class="intereses">
+        <h3>Intereses segundoVencimiento:</h3>
+        <input
+          type="number"
+          v-model="expensa.expensaCreateDTO.porcentajeSegundoVencimiento"
+          placeholder="Porcentaje de intereses segundo vencimiento"
+          min="0"
+          step="0.01"
+          style="text-align: center;"
+        />
       </div>
     </div>
+
     <div class="botones">
       <button @click="previsualizarExpensa">PREVISUALIZAR EXPENSA</button>
       <button @click="liquidarExpensa">LIQUIDAR EXPENSA</button>
@@ -170,6 +238,9 @@ const adminStore = useAdminStore()
 const consorcioStore = useConsorcioStore()
 const intermediaStore = useIntermediaStore()
 const authStore = useAuthStore()
+const mostrarMovimientos = ref(false);
+const mostrarNota = ref(false);
+const mostrarJuicios = ref(false);
 
 // Referencias reactivas
 const selectedConsorcio = computed(() => consorcioStore.selectedConsorcio)
@@ -187,11 +258,14 @@ const ingresos = ref([])
 const expensa = ref({
   idExpensa: null,
   repetirEgresos: false,
+  segundoVencimiento: false,
   expensaCreateDTO: {
     idConsorcio: null,
     periodo: null,
     porcentajeIntereses: 0,
-    porcentajeSegundoVencimiento: 0
+    porcentajeSegundoVencimiento: 0,
+    nota:'',
+    juicios:''
   }
 })
 
@@ -497,14 +571,26 @@ const limpiarValores = () => {
   pagosUf.value = []
   expensa.value = {
     idExpensa: null,
+    repetirEgresos: false,
+    segundoVencimiento: false,
     expensaCreateDTO: {
       idConsorcio: null,
       periodo: null,
       porcentajeIntereses: 0,
-      porcentajeSegundoVencimiento: 0
+      porcentajeSegundoVencimiento: 0,
+      nota:'',
+      juicios:''
     }
   }
   porcentajeIntereses.value = 0
+}
+
+const currency = (value) => {
+  if (value === null || value === undefined) return '$0.00'
+  return new Intl.NumberFormat('es-AR', {
+    style: 'currency',
+    currency: 'ARS'
+  }).format(value)
 }
 
 onMounted(() => {
@@ -546,6 +632,9 @@ onUnmounted(() => {
   box-shadow:
     2px 2px 2px rgba(0, 0, 0, 0.3),
     -2px -2px 2px rgba(0, 0, 0, 0.3);
+  height: 300px;
+  max-height: 300px;
+  overflow: scroll;
 }
 
 .tabla::-webkit-scrollbar,
@@ -580,6 +669,7 @@ onUnmounted(() => {
 table {
   width: 100%;
   border-collapse: collapse;
+  background-color: #ffffffe0;
 }
 
 thead {
@@ -630,14 +720,65 @@ button {
   margin-right: 5px;
 }
 
-.formulario-pagos button:hover {
+button:hover {
   background-color: #885b21e0;
 }
 
 .repetir {
+  text-align: left;
+}
+
+.intereses{
   text-align: right;
 }
+
 .botones {
   text-align: center;
+}
+
+.boton-eliminar{
+  border-radius: 20%;
+  background-color: rgb(220, 34, 34);
+  font-size: 10px;
+}
+
+.boton-eliminar:hover{
+  background-color: rgb(186, 31, 31);
+
+}
+
+.toggle-movimientos {
+  cursor: pointer;
+  background-color: var(--sumerio-marron);
+  padding: 1rem;
+  font-size: 1.5rem;
+  font-weight: bold;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+  transition: background-color 0.2s ease;
+}
+
+.toggle-movimientos:hover {
+  background-color: #885b21e0;
+}
+
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.2s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+
+.fade-enter-to,
+.fade-leave-from {
+  opacity: 1;
 }
 </style>

@@ -37,7 +37,7 @@
           Editar Estado de Cuenta de UF {{ unidadSeleccionada.unidadFuncional }} -
           {{ unidadSeleccionada.apellidoPropietario }}. PERIODO {{ estadoCuentaUf.periodo }}
         </h3>
-        <form @submit.prevent="guardarCambios">
+        <form @submit.prevent="guardarCambios" class="form-grid">
           <div>
             <label for="deuda">Deuda:</label>
             <input id="deuda" type="number" v-model="estadoCuentaUf.deuda" />
@@ -74,8 +74,14 @@
             <label for="totalFinal">Total Final:</label>
             <input id="totalFinal" type="number" v-model="estadoCuentaUf.totalExpensa" />
           </div>
-          <button type="submit">Guardar Cambios</button>
-          <button type="button" @click="cancelarEdicion">Cancelar</button>
+          <div v-if="consorcio.segundoVencimiento">
+            <label for="segundoVencimiento">Segundo Vencimiento:</label>
+            <input id="segundoVencimiento" type="number" v-model="estadoCuentaUf.segundoVencimiento" />
+          </div>
+          <div class="form-actions">
+            <button type="submit">Guardar Cambios</button>
+            <button type="button" @click="cancelarEdicion">Cancelar</button>
+          </div>
         </form>
         <button type="submit" @click="crearPeriodo">Terminar</button>
       </div>
@@ -89,12 +95,13 @@
 
 <script setup>
 // IMPORTS
+import { API_CONSORCIO } from '@renderer/config/config'
 import { API_UF } from '@renderer/config/config'
 import { ref, onMounted, onUnmounted, computed, watch } from 'vue'
 import axios from 'axios'
 import { useAdminStore } from '@renderer/stores/adminStore'
+import { useConsorcioStore } from '@renderer/stores/consorcioStore.js'
 import { useIntermediaStore } from '@renderer/stores/intermediaStore'
-import { useConsorcioStore } from '@renderer/stores/consorcioStore'
 import { useNavigationGuardStore } from '@renderer/stores/navigationGuardStore'
 import { useRouter, useRoute } from 'vue-router'
 import { showErrorDialog } from '../utils/dialogs'
@@ -103,12 +110,13 @@ import { showErrorDialog } from '../utils/dialogs'
 const router = useRouter()
 const route = useRoute()
 const adminStore = useAdminStore()
-const intermediaStore = useIntermediaStore()
 const consorcioStore = useConsorcioStore()
+const intermediaStore = useIntermediaStore()
 const navigationGuardStore = useNavigationGuardStore()
 
 const idAdm = adminStore.administracionData.idAdm
 const idConsorcio = route.params.idConsorcio
+const consorcioUrl = API_CONSORCIO(idAdm, idConsorcio)
 
 // API
 const apiUF = `${API_UF(idAdm, idConsorcio)}`
@@ -116,6 +124,7 @@ const periodoSeleccionado = ref('')
 const siguientePeriodo = ref('')
 
 const unidades = ref([])
+const consorcio = ref({})
 const unidadesOrdenadas = computed(() =>
   unidades.value.slice().sort((a, b) => a.unidadFuncional - b.unidadFuncional)
 )
@@ -138,7 +147,9 @@ const estadoCuentaUf = ref({
   totalExpensa: 0,
   saldoFinal: 0,
   saldoExpensa: 0,
-  saldoIntereses: 0
+  saldoIntereses: 0,
+  segundoVencimientoActivo: false,
+  segundoVencimiento: 0
 })
 
 const mostrarAdvertencia = ref(false)
@@ -241,7 +252,9 @@ const cancelarEdicion = () => {
     totalExpensa: 0,
     saldoFinal: 0,
     saldoExpensa: 0,
-    saldoIntereses: 0
+    saldoIntereses: 0,
+    segundoVencimientoActivo: false,
+    segundoVencimiento: 0
   }
 }
 
@@ -251,6 +264,7 @@ const crearPeriodo = async () => {
     const response = await axios.post('http://192.168.0.1:8080/api/expensas', expensa.value)
     intermediaStore.loadIntermedias()
     navigationGuardStore.allowNavigation()
+    window.api.alert('Estados de cuenta editados exitosamente.')
     router.push({ name: 'home' })
   } catch (error) {
     console.error('Error al crear la expensa:', error)
@@ -259,9 +273,20 @@ const crearPeriodo = async () => {
   }
 }
 
+const obtenerConsorcio = async () => {
+  try {
+    const response = await axios.get(consorcioUrl)
+    consorcio.value = response.data
+  } catch (error) {
+    console.error('Error al obtener el consorcio:', error)
+    showErrorDialog(error)
+  }
+}
+
 onMounted(() => {
   cargarUnidadesFuncionales()
   navigationGuardStore.blockNavigation()
+  obtenerConsorcio()
 })
 
 onUnmounted(() => {
@@ -275,6 +300,7 @@ onUnmounted(() => {
   display: flex;
   flex-direction: column;
   align-items: center;
+  padding: 10px;
 }
 
 .period-selector {
@@ -304,6 +330,27 @@ onUnmounted(() => {
   padding: 15px;
   border: 1px solid black;
   overflow-y: auto;
+  font-size: 12px;
+}
+
+.main-content::-webkit-scrollbar {
+  width: 8px;
+  height: 0px;
+}
+
+.main-content::-webkit-scrollbar-track {
+  background: #f0f0f0; /* fondo del track del scroll */
+  border-radius: 4px;
+}
+
+.main-content::-webkit-scrollbar-thumb {
+  background-color: var(--sumerio-marron); /* color del scroll "thumb" */
+  border-radius: 4px;
+  border: 1px solid #573b27;
+}
+
+.main-content::-webkit-scrollbar-thumb:hover {
+  background-color: #a96f3e; /* color al pasar el mouse */
 }
 
 .uf-list {
@@ -340,7 +387,7 @@ button {
 label {
   font-weight: bold;
   display: block;
-  margin-bottom: 5px;
+  margin-bottom: 2px;
 }
 
 input {
@@ -358,16 +405,16 @@ button:hover {
 }
 
 .mensaje-error {
-  position: fixed; /* Lo fija en la pantalla */
-  top: 50%; /* Centrado vertical */
-  left: 50%; /* Centrado horizontal */
-  transform: translate(-50%, -50%); /* Para que quede perfectamente centrado */
-  background-color: rgba(255, 0, 0, 0.8); /* Fondo semitransparente */
-  color: white; /* Texto blanco */
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: rgba(255, 0, 0, 0.8);
+  color: white;
   padding: 20px;
   border-radius: 8px;
   font-weight: bold;
-  z-index: 1000; /* Asegura que quede por encima de otros elementos */
+  z-index: 1000;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -410,5 +457,19 @@ tr:hover {
 
 .clickable-row:hover {
   background-color: var(--sumerio-rojo-claro);
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px 20px; /* espacio entre filas y columnas */
+}
+
+.form-actions {
+  grid-column: span 2; /* Hace que ocupe las dos columnas */
+  display: flex;
+  gap: 10px;
+  justify-content: flex-start; /* o center, según tu diseño */
+  margin-top: 10px;
 }
 </style>

@@ -3,53 +3,88 @@
     <div v-if="!estadoCuentaConsorcio" class="container">
       <form @submit.prevent="crearConsorcio" class="formulario">
         <!-- Campos para el consorcio -->
-        <h3>DATOS DEL CONSORCIO</h3>
+        <div class="form-row-consorcio">
+          <div class="datos-consorcio">
+            <h1>Datos del consorcio</h1>
+            <div class="form-group">
+              <label for="nombre">Nombre:</label>
+              <input type="text" v-model="consorcio.nombre" class="form-control" required />
+            </div>
 
-        <div class="form-group">
-          <label for="nombre">Nombre:</label>
-          <input type="text" v-model="consorcio.nombre" class="form-control" required />
+            <div class="form-group">
+              <label for="direccion">Dirección:</label>
+              <input type="text" v-model="consorcio.direccion" class="form-control" required />
+            </div>
+
+            <div class="form-group">
+              <label for="ciudad">Ciudad:</label>
+              <input type="text" v-model="consorcio.ciudad" class="form-control" required />
+            </div>
+
+            <div class="form-group">
+              <label for="cuit">CUIT:</label>
+              <input type="text" v-model="consorcio.cuit" class="form-control" />
+            </div>
+          </div>
+          <div class="datos-consorcio-banco">
+            <h1>Datos bancarios</h1>
+
+            <div class="form-group">
+              <label for="titulo">Título de cuenta:</label>
+              <input type="text" v-model="consorcio.titulo" class="form-control" />
+            </div>
+
+            <div class="form-group">
+              <label for="banco">Banco:</label>
+              <input type="text" v-model="consorcio.banco" class="form-control" />
+            </div>
+
+            <div class="form-group">
+              <label for="numCuenta">Número de cuenta:</label>
+              <input type="text" v-model="consorcio.numCuenta" class="form-control" />
+            </div>
+
+            <div class="form-group">
+              <label for="cbu">CBU:</label>
+              <input type="text" v-model="consorcio.cbu" class="form-control" />
+            </div>
+
+            <div class="form-group">
+              <label for="alias">Alias:</label>
+              <input type="text" v-model="consorcio.alias" class="form-control" />
+            </div>
+          </div>
         </div>
 
-        <div class="form-group">
-          <label for="direccion">Dirección:</label>
-          <input type="text" v-model="consorcio.direccion" class="form-control" required />
-        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="porcentajeIntereses">% Intereses</label>
+            <input
+              id="porcentajeIntereses"
+              type="number"
+              v-model="consorcio.porcentajeIntereses"
+              required
+              step="0.01"
+              min="0"
+            />
+          </div>
 
-        <div class="form-group">
-          <label for="ciudad">Ciudad:</label>
-          <input type="text" v-model="consorcio.ciudad" class="form-control" required />
-        </div>
+          <div class="form-group">
+            <label for="formaPago">Segundo Vencimiento</label>
+            <input id="formaPago" type="checkbox" v-model="consorcio.segundoVencimiento" />
+          </div>
 
-        <div class="form-group">
-          <label for="cuit">CUIT:</label>
-          <input type="text" v-model="consorcio.cuit" class="form-control" />
-        </div>
-
-        <h3 style="padding-top: 10px">DATOS BANCARIOS DEL CONSORCIO</h3>
-
-        <div class="form-group">
-          <label for="titulo">Título de cuenta:</label>
-          <input type="text" v-model="consorcio.titulo" class="form-control" />
-        </div>
-
-        <div class="form-group">
-          <label for="banco">Banco:</label>
-          <input type="text" v-model="consorcio.banco" class="form-control" />
-        </div>
-
-        <div class="form-group">
-          <label for="numCuenta">Número de cuenta:</label>
-          <input type="text" v-model="consorcio.numCuenta" class="form-control" />
-        </div>
-
-        <div class="form-group">
-          <label for="cbu">CBU:</label>
-          <input type="text" v-model="consorcio.cbu" class="form-control" />
-        </div>
-
-        <div class="form-group">
-          <label for="alias">Alias:</label>
-          <input type="text" v-model="consorcio.alias" class="form-control" />
+          <div v-if="consorcio.segundoVencimiento" class="form-group">
+            <label for="porcentajeSegundoVencimiento">% Segundo Vencimiento</label>
+            <input
+              id="porcentajeSegundoVencimiento"
+              type="number"
+              v-model="consorcio.porcentajeSegundoVencimiento"
+              required
+              step="0.01"
+              min="0"
+            />
+          </div>
         </div>
 
         <div class="form-group botones">
@@ -135,8 +170,12 @@ const consorcio = ref({
   banco: '',
   numCuenta: '',
   cbu: '',
-  alias: ''
+  alias: '',
+  porcentajeIntereses: 0,
+  segundoVencimiento: false,
+  porcentajeSegundoVencimiento: 0
 })
+
 const idConsorcioCreado = ref(null)
 const estadoCuentaConsorcio = ref(null)
 
@@ -148,10 +187,10 @@ const crearConsorcio = async () => {
     const response = await axios.post(apiConsorcios, consorcio.value)
     const { id } = response.data
 
-    console.log('ID del consorcio creado:', id) // Verifica el ID recibido
+    console.log('ID del consorcio creado:', id)
 
-    idConsorcioCreado.value = id // Asigna directamente
-    await cargarEstadoCuentaConsorcio(id) // Asegúrate de esperar esta función
+    idConsorcioCreado.value = id
+    await cargarEstadoCuentaConsorcio(id)
   } catch (error) {
     console.error('Error al crear consorcio:', error.response ? error.response.data : error.message)
     showErrorDialog(error)
@@ -250,6 +289,7 @@ h3 {
   width: 100%;
   text-align: center;
   justify-content: center;
+  max-height: 100%;
 }
 
 .formulario label {
@@ -258,15 +298,15 @@ h3 {
   margin-bottom: 5px;
 }
 
-.formulario input {
+.formulario :not(.form-row) input {
   border: 1px solid #bbb;
   border-radius: 4px;
   padding: 6px 10px;
-  width: 30%;
   box-sizing: border-box;
-  margin-bottom: 5px;
-  font-size: 14px;
+  margin-bottom: 10px;
+  font-size: 12px;
   text-align: center;
+  width: 100%;
 }
 
 .formulario .btn {
@@ -363,5 +403,47 @@ button {
   flex-wrap: wrap;
   flex-direction: row; /* Asegura que estén en fila */
   align-items: center; /* Alinea los botones verticalmente */
+}
+
+.form-row {
+  display: flex;
+  margin-bottom: 10px;
+  border: 2px, solid, black;
+  padding: 10px;
+  box-shadow:
+    3px 3px 3px rgba(0, 0, 0, 0.3),
+    -3px -3px 3px rgba(0, 0, 0, 0.3);
+}
+
+.form-row .form-group {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Centrar horizontalmente y ubicar los elementos en fila */
+.form-row-consorcio {
+  display: flex;
+  justify-content: center; /* Centra el contenido horizontalmente */
+  gap: 20px; /* Espacio entre los divs internos */
+  margin-bottom: 20px;
+}
+
+/* Los divs internos deben tener tamaño definido o crecer automáticamente */
+.datos-consorcio,
+.datos-consorcio-banco {
+  flex: 1;
+  max-width: 100%;
+  border: 2px, solid, black;
+  padding: 10px;
+  box-shadow:
+    3px 3px 3px rgba(0, 0, 0, 0.3),
+    -3px -3px 3px rgba(0, 0, 0, 0.3);
+}
+
+.formulario h1 {
+  color: black;
+  font-weight: bolder;
+  margin-bottom: 10px;
 }
 </style>

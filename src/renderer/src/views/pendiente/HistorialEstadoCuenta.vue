@@ -5,10 +5,6 @@
       <BotonUf />
     </div>
     <div class="tabla-estados-cuenta">
-      <h4>
-        Historial => {{ selectedConsorcio?.nombre }} - {{ selectedUf?.titulo }} -
-        {{ selectedUf?.apellidoPropietario }}
-      </h4>
       <table>
         <thead>
           <tr>
@@ -22,6 +18,7 @@
             <th>E</th>
             <th>Gasto Particular</th>
             <th>Total Expensas</th>
+            <th>2° VTO</th>
             <th>Total Pago</th>
             <th>Saldo Final</th>
           </tr>
@@ -29,38 +26,52 @@
         <tbody v-if="selectedUf">
           <tr>
             <td>{{ estadoCuentaActual?.periodo }}</td>
-            <td>$ {{ estadoCuentaActual?.deuda }}</td>
-            <td>$ {{ estadoCuentaActual?.intereses }}</td>
-            <td>$ {{ estadoCuentaActual?.totalA }}</td>
-            <td>$ {{ estadoCuentaActual?.totalB }}</td>
-            <td>$ {{ estadoCuentaActual?.totalC }}</td>
-            <td>$ {{ estadoCuentaActual?.totalD }}</td>
-            <td>$ {{ estadoCuentaActual?.totalE }}</td>
-            <td>$ {{ estadoCuentaActual?.gastoParticular }}</td>
-            <td>$ {{ estadoCuentaActual?.totalExpensa }}</td>
+            <td>{{ currency(estadoCuentaActual?.deuda) }}</td>
+            <td>{{ currency(estadoCuentaActual?.intereses) }}</td>
+            <td>{{ currency(estadoCuentaActual?.totalA) }}</td>
+            <td>{{ currency(estadoCuentaActual?.totalB) }}</td>
+            <td>{{ currency(estadoCuentaActual?.totalC) }}</td>
+            <td>{{ currency(estadoCuentaActual?.totalD) }}</td>
+            <td>{{ currency(estadoCuentaActual?.totalE) }}</td>
+            <td>{{ currency(estadoCuentaActual?.gastoParticular) }}</td>
+            <td>{{ currency(estadoCuentaActual?.totalExpensa) }}</td>
             <td>
-              $
+              {{
+                estadoCuentaActual?.segundoVencimiento !== 0 &&
+                estadoCuentaActual?.segundoVencimiento !== null
+                  ? currency(estadoCuentaActual?.segundoVencimiento)
+                  : currency(0)
+              }}
+            </td>
+            <td>
               {{
                 estadoCuentaActual?.periodo
-                  ? totalPagoPorPeriodo(mostrarSiguientePeriodo(estadoCuentaActual.periodo))
+                  ? currency(totalPagoPorPeriodo(mostrarSiguientePeriodo(estadoCuentaActual.periodo)))
                   : 'N/A'
               }}
             </td>
-            <td>$ {{ estadoCuentaActual?.saldoFinal }}</td>
+            <td>{{ currency(estadoCuentaActual?.saldoFinal) }}</td>
           </tr>
           <tr v-for="(copia, index) in copiasEstadoCuenta" :key="index">
             <td>{{ copia.periodo }}</td>
-            <td>$ {{ copia.deuda }}</td>
-            <td>$ {{ copia.intereses }}</td>
-            <td>$ {{ copia.totalA }}</td>
-            <td>$ {{ copia.totalB }}</td>
-            <td>$ {{ copia.totalC }}</td>
-            <td>$ {{ copia.totalD }}</td>
-            <td>$ {{ copia.totalE }}</td>
-            <td>$ {{ copia.gastoParticular }}</td>
-            <td>$ {{ copia.totalExpensa }}</td>
-            <td>$ {{ totalPagoPorPeriodo(mostrarSiguientePeriodo(copia.periodo)) }}</td>
-            <td>$ {{ copia.saldoFinal }}</td>
+            <td>{{ currency(copia.deuda) }}</td>
+            <td>{{ currency(copia.intereses) }}</td>
+            <td>{{ currency(copia.totalA) }}</td>
+            <td>{{ currency(copia.totalB) }}</td>
+            <td>{{ currency(copia.totalC) }}</td>
+            <td>{{ currency(copia.totalD) }}</td>
+            <td>{{ currency(copia.totalE) }}</td>
+            <td>{{ currency(copia.gastoParticular) }}</td>
+            <td>{{ currency(copia.totalExpensa) }}</td>
+            <td>
+              {{
+                copia.segundoVencimiento !== 0 && copia.segundoVencimiento !== null
+                  ? currency(copia.segundoVencimiento)
+                  : currency(0)
+              }}
+            </td>
+            <td>{{ currency(totalPagoPorPeriodo(mostrarSiguientePeriodo(copia.periodo))) }}</td>
+            <td>{{ currency(copia.saldoFinal) }}</td>
           </tr>
         </tbody>
       </table>
@@ -157,6 +168,14 @@ const mostrarSiguientePeriodo = (periodo) => {
   console.log(siguienteFecha)
   console.warn('PERIODO SIGUIENTE')
   return siguienteFecha
+}
+
+const currency = (value) => {
+  if (value === null || value === undefined) return '$0.00'
+  return new Intl.NumberFormat('es-AR', {
+    style: 'currency',
+    currency: 'ARS'
+  }).format(value)
 }
 </script>
 

@@ -38,103 +38,144 @@
 
         <div v-else>
           <form @submit.prevent="updateConsorcio">
-            <div>
-              <label for="nombre">Nombre</label>
-              <input
-                v-model="consorcioSeleccionado.nombre"
-                @input="onInputChange"
-                :placeholder="`${consorcioSeleccionado.nombre}`"
-                id="nombre"
-                class="form-control"
-                required
-              />
+            <label for="nombre">Nombre</label>
+            <input
+              v-model="consorcioSeleccionado.nombre"
+              @input="onInputChange"
+              :placeholder="`${consorcioSeleccionado.nombre}`"
+              id="nombre"
+              class="form-control"
+              required
+            />
+
+            <label for="direccion">Direccion</label>
+            <input
+              v-model="consorcioSeleccionado.direccion"
+              @input="onInputChange"
+              :placeholder="`${consorcioSeleccionado.direccion}`"
+              id="direccion"
+              class="form-control"
+              required
+            />
+
+            <label for="ciudad">Ciudad</label>
+            <input
+              v-model="consorcioSeleccionado.ciudad"
+              @input="onInputChange"
+              :placeholder="`${consorcioSeleccionado.ciudad}`"
+              id="ciudad"
+              class="form-control"
+              required
+            />
+
+            <label for="cuit">Cuit</label>
+            <input
+              v-model="consorcioSeleccionado.cuit"
+              @input="onInputChange"
+              :placeholder="`${consorcioSeleccionado.cuit}`"
+              id="cuit"
+              class="form-control"
+            />
+            <label for="titulo">Titulo de Cuenta</label>
+            <input
+              v-model="consorcioSeleccionado.titulo"
+              @input="onInputChange"
+              :placeholder="`${consorcioSeleccionado.titulo}`"
+              id="titulo"
+              class="form-control"
+            />
+
+            <label for="banco">Banco</label>
+            <input
+              v-model="consorcioSeleccionado.banco"
+              @input="onInputChange"
+              :placeholder="`${consorcioSeleccionado.banco}`"
+              id="banco"
+              class="form-control"
+            />
+            <label for="numCuenta">N° de Cuenta</label>
+            <input
+              v-model="consorcioSeleccionado.numCuenta"
+              @input="onInputChange"
+              :placeholder="`${consorcioSeleccionado.numCuenta}`"
+              id="numCuenta"
+              class="form-control"
+            />
+
+            <label for="cbu">CBU</label>
+            <input
+              v-model="consorcioSeleccionado.cbu"
+              @input="onInputChange"
+              :placeholder="`${consorcioSeleccionado.cbu}`"
+              id="cbu"
+              class="form-control"
+            />
+            <label for="alias">Alias</label>
+            <input
+              v-model="consorcioSeleccionado.alias"
+              @input="onInputChange"
+              :placeholder="`${consorcioSeleccionado.alias}`"
+              id="alias"
+              class="form-control"
+            />
+
+            <div class="form-row">
+              <div class="form-group">
+                <label for="porcentajeIntereses">% Intereses</label>
+                <input
+                  id="porcentajeIntereses"
+                  type="number"
+                  @input="onInputChange"
+                  :placeholder="`${consorcioSeleccionado.porcentajeIntereses}`"
+                  v-model="consorcioSeleccionado.porcentajeIntereses"
+                  required
+                  step="0.01"
+                  min="0"
+                  style="text-align: center;"
+                />
+              </div>
+
+              <div class="form-group">
+                <label for="formaPago">Segundo Vencimiento</label>
+                <input
+                  id="formaPago"
+                  type="checkbox"
+                  @input="onInputChange"
+                  :placeholder="`${consorcioSeleccionado.segundoVencimiento}`"
+                  v-model="consorcioSeleccionado.segundoVencimiento"
+                />
+              </div>
+
+              <div class="form-group">
+                <label for="porcentajeSegundoVencimiento">% Segundo Vencimiento</label>
+                <input
+                  id="porcentajeSegundoVencimiento"
+                  type="number"
+                  @input="onInputChange"
+                  :placeholder="`${consorcioSeleccionado.porcentajeSegundoVencimiento}`"
+                  v-model="consorcioSeleccionado.porcentajeSegundoVencimiento"
+                  required
+                  step="0.01"
+                  min="0"
+                  style="text-align: center;"
+                />
+              </div>
             </div>
-            <div>
-              <label for="direccion">Direccion</label>
-              <input
-                v-model="consorcioSeleccionado.direccion"
-                @input="onInputChange"
-                :placeholder="`${consorcioSeleccionado.direccion}`"
-                id="direccion"
-                class="form-control"
-                required
-              />
 
-              <label for="ciudad">Ciudad</label>
-              <input
-                v-model="consorcioSeleccionado.ciudad"
-                @input="onInputChange"
-                :placeholder="`${consorcioSeleccionado.ciudad}`"
-                id="ciudad"
-                class="form-control"
-                required
-              />
+            <div class="grupo-botones">
+              <button type="submit" class="btn btn-success">Guardar Cambios</button>
+              <button
+                type="button"
+                class="btn btn-alert"
+                @click="deleteConsorcio(consorcioSeleccionado.idConsorcio)"
+              >
+                Eliminar consorcio
+              </button>
+              <button type="button" class="btn btn-cancel" @click="cancelarEdicion()">
+                Cancelar cambios
+              </button>
             </div>
-            <div>
-              <label for="cuit">Cuit</label>
-              <input
-                v-model="consorcioSeleccionado.cuit"
-                @input="onInputChange"
-                :placeholder="`${consorcioSeleccionado.cuit}`"
-                id="cuit"
-                class="form-control"
-              />
-              <label for="titulo">Titulo de Cuenta</label>
-              <input
-                v-model="consorcioSeleccionado.titulo"
-                @input="onInputChange"
-                :placeholder="`${consorcioSeleccionado.titulo}`"
-                id="titulo"
-                class="form-control"
-              />
-
-              <label for="banco">Banco</label>
-              <input
-                v-model="consorcioSeleccionado.banco"
-                @input="onInputChange"
-                :placeholder="`${consorcioSeleccionado.banco}`"
-                id="banco"
-                class="form-control"
-              />
-              <label for="numCuenta">N° de Cuenta</label>
-              <input
-                v-model="consorcioSeleccionado.numCuenta"
-                @input="onInputChange"
-                :placeholder="`${consorcioSeleccionado.numCuenta}`"
-                id="numCuenta"
-                class="form-control"
-              />
-
-              <label for="cbu">CBU</label>
-              <input
-                v-model="consorcioSeleccionado.cbu"
-                @input="onInputChange"
-                :placeholder="`${consorcioSeleccionado.cbu}`"
-                id="cbu"
-                class="form-control"
-              />
-              <label for="alias">Alias</label>
-              <input
-                v-model="consorcioSeleccionado.alias"
-                @input="onInputChange"
-                :placeholder="`${consorcioSeleccionado.alias}`"
-                id="alias"
-                class="form-control"
-              />
-            </div>
-
-            <button type="submit" class="btn btn-success">Guardar Cambios</button>
           </form>
-          <button
-            type="submit"
-            class="btn btn-alert"
-            @click="deleteConsorcio(consorcioSeleccionado.idConsorcio)"
-          >
-            Eliminar consorcio
-          </button>
-          <button type="submit" class="btn btn-cancel" @click="cancelarEdicion()">
-            Cancelar cambios
-          </button>
         </div>
       </div>
     </div>
@@ -185,21 +226,8 @@ const obtenerConsorcios = async () => {
 
 // Función para seleccionar un consorcio y redirigir a la vista de edición
 const selectConsorcio = (consorcio) => {
-  consorcioSeleccionado.value = {
-    idAdm,
-    idConsorcio: consorcio.idConsorcio || 0,
-
-    nombre: consorcio.nombre || '',
-    direccion: consorcio.direccion || '',
-    ciudad: consorcio.ciudad || '',
-
-    cuit: consorcio.cuit || '',
-    titulo: consorcio.titulo || '',
-    cbu: consorcio.cbu || '',
-    banco: consorcio.banco || '',
-    numCuenta: consorcio.numCuenta || '',
-    alias: consorcio.alias || ''
-  }
+  consorcioSeleccionado.value = consorcio;
+  console.log(JSON.stringify(consorcioSeleccionado.value))
   banderaSeleccion.value = true
 }
 
@@ -213,6 +241,7 @@ const updateConsorcio = async () => {
       `${consorciosUrl}/${consorcioSeleccionado.value.idConsorcio}`,
       consorcioSeleccionado.value
     )
+    console.log(JSON.stringify(consorcioSeleccionado.value))
     window.api.alert('Consorcio ' + consorcioSeleccionado.value.nombre + ' actualizado con éxito.')
     banderaSeleccion.value = false
     unsavedChanges.value = false
@@ -262,6 +291,7 @@ onBeforeRouteLeave((to, from, next) => {
     showConfirmDialog('Tienes cambios sin guardar. ¿Estás seguro que quieres salir?').then(
       (confirmLeave) => {
         if (confirmLeave) {
+          cancelarEdicion()
           next() // Permitir la navegación
         } else {
           next(false) // Cancelar la navegación
@@ -289,42 +319,49 @@ onBeforeRouteLeave((to, from, next) => {
   height: 100%;
 }
 
+/* Estilos para el scrollbar */
+.container-datos-consorcios::-webkit-scrollbar,
 .container-consorcios::-webkit-scrollbar {
   width: 8px;
   height: 8px;
 }
-
+.container-datos-consorcios::-webkit-scrollbar-track,
 .container-consorcios::-webkit-scrollbar-track {
-  background: #f0f0f0; /* fondo del track del scroll */
+  background: #f0f0f0;
   border-radius: 4px;
 }
 
+.container-datos-consorcios::-webkit-scrollbar-thumb,
 .container-consorcios::-webkit-scrollbar-thumb {
-  background-color: var(--sumerio-marron); /* color del scroll "thumb" */
+  background-color: var(--sumerio-marron);
   border-radius: 4px;
-  border: 1px solid #573b27; /* borde opcional */
+  border: 1px solid #573b27;
 }
 
+.container-datos-consorcios::-webkit-scrollbar-thumb:hover,
 .container-consorcios::-webkit-scrollbar-thumb:hover {
-  background-color: #a96f3e; /* color al pasar el mouse */
+  background-color: #a96f3e;
 }
+
 /* Estilos para la tabla */
 table {
   width: 100%;
   border-collapse: collapse;
   background-color: #ffffffe0;
-  margin-bottom: 5px;
+  margin-bottom: 10px;
 }
 
 th,
 td {
   border: 1px solid #ddd;
   padding: 8px;
+  text-align: left;
 }
 
 th {
   font-weight: bold;
   background-color: var(--sumerio-marron);
+  color: white;
 }
 
 tr:nth-child(even) {
@@ -332,75 +369,64 @@ tr:nth-child(even) {
 }
 
 tr:hover {
-  background-color: #f1f1f1;
+  background-color: #e0e0e0;
 }
 
 .clickable-row {
   cursor: pointer;
-  transition: background-color 0.3s;
-}
-
-.clickable-row:hover {
-  background-color: #e0e0e0;
+  transition: background-color 0.3s ease;
 }
 
 .container-consorcios,
 .container-datos-consorcios {
-  flex-basis: 50%; /* Ocupa el 50% del contenedor principal */
-  overflow-y: auto; /* Desplazamiento vertical si hay contenido extenso */
-  box-sizing: border-box; /* Asegura que el padding y el borde se incluyan en el ancho total */
+  flex-basis: 50%;
+  overflow-y: auto;
+  box-sizing: border-box;
   height: 100%;
-  padding: 10px; /* Espacio interno */
-  background-color: #f3d08e; /* Fondo claro */
+  padding: 15px;
+  background-color: #f3d08e;
   border: 1px solid black;
-  border-radius: 8px; /* Bordes redondeados */
+  border-radius: 8px;
   box-shadow:
     3px 3px 3px rgba(0, 0, 0, 0.3),
     -3px -3px 3px rgba(0, 0, 0, 0.3);
 }
 
-.container-datos-consorcios h2 {
-  font-size: 1.1rem;
-  font-weight: bold;
-  color: #333; /* Color de texto principal */
-  text-align: center;
-}
-
 .container-datos-consorcios form {
   display: flex;
-  flex-direction: column; /* Apila los elementos verticalmente */
-  gap: 2px; /* Espaciado entre elementos */
+  flex-direction: column;
 }
 
-.container-datos-consorcios form div {
+.container-datos-consorcios form > div {
   display: flex;
   flex-direction: column;
-  margin-bottom: 2px;
 }
 
 .container-datos-consorcios label {
   font-weight: bold;
-  color: black; /* Color del texto de las etiquetas */
-  margin-bottom: 1px;
+  color: black;
+  margin-top: 2px;
+  margin-bottom: 2px;
+  font-size: 12px;
 }
 
 .container-datos-consorcios .form-control {
-  padding: 1px;
-  font-size: 1rem;
-  border: 1px solid #ddd; /* Borde suave */
-  border-radius: 4px;
+  padding: 5px 8px;
+  border: 1px solid #ddd;
+  border-radius: 1px;
   transition: border-color 0.2s ease-in-out;
+  font-size: 12px;
 }
 
 .container-datos-consorcios .form-control:focus {
-  border-color: #007bff; /* Azul al enfocar */
+  border-color: #007bff;
   outline: none;
   box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
 }
 
 .container-datos-consorcios .btn {
-  padding: 2px 1px;
-  font-size: 1rem;
+  padding: 8px 12px;
+  font-size: 0.9rem;
   border-radius: 4px;
   border: none;
   cursor: pointer;
@@ -409,52 +435,70 @@ tr:hover {
     transform 0.2s;
 }
 
-.container-datos-consorcios .btn-success {
-  background-color: #28a745; /* Verde */
-  font-weight: bold;
-  color: white;
-  margin-top: 5px;
-  margin-bottom: 5px;
-  border: 1px solid black;
-}
-
 .container-datos-consorcios .btn-success:hover {
   background-color: #218838;
-}
-
-.container-datos-consorcios .btn-alert {
-  background-color: #dc3545; /* Rojo */
-  font-weight: bold;
-  color: white;
-  margin-right: 5px;
-  border: 1px solid black;
 }
 
 .container-datos-consorcios .btn-alert:hover {
   background-color: #c82333;
 }
 
-.container-datos-consorcios .btn-cancel {
-  background-color: #d8d6d6;
-  font-weight: bold;
-  color: black;
-  border: 1px solid black;
-}
-
 .container-datos-consorcios .btn-cancel:hover {
   background-color: #8d8b8b;
 }
 
-/* Solo afecta al div cuando banderaSeleccion es falso */
 .center-content {
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 100%; /* Asegura que el contenedor ocupe toda la altura disponible */
+  height: 100%;
 }
 
 .logo {
   max-width: 100%;
   max-height: 100%;
+  object-fit: contain;
+}
+
+.container-datos-consorcios .btn {
+  font-weight: bold;
+  background-color: var(--sumerio-marron);
+  margin-top: 3px;
+  padding: 8px;
+  border: none;
+  color: black;
+  font-size: 12px;
+  border-radius: 6px;
+  transition: background-color 0.3s ease;
+}
+
+.container-datos-consorcios form .form-row {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 10px;
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+  text-align: center;
+}
+
+.container-datos-consorcios form .form-row .form-group {
+  flex: 1;
+  min-width: 80px;
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 0;
+}
+
+.grupo-botones {
+  display: flex;
+  gap: 1px;
+  margin-top: 5px;
+  min-width: 100px;
+}
+
+.grupo-botones .btn {
+  flex: 1;
 }
 </style>

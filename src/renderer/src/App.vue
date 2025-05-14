@@ -68,6 +68,7 @@ onMounted(() => {
   --sumerio-rojo-oscuro: #8c3030;
   --sumerio-marron: #bf9341;
   --sumerio-crema: #f2e399;
+  --sumerio-select: #e8d160;
   --sumerio-negro: #181818;
 
   --color-text-1: #ffffff;

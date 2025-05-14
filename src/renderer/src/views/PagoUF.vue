@@ -12,11 +12,12 @@
             <table class="table table-striped">
               <thead>
                 <tr>
-                  <th>N° UF</th>
+                  <th>UF</th>
                   <th>Título</th>
-                  <th>Prpietario</th>
-                  <th>Total a pagar</th>
-                  <th>Saldo a pagar</th>
+                  <th>Prop.</th>
+                  <th>Total</th>
+                  <th>Pago</th>
+                  <th>Saldo</th>
                 </tr>
               </thead>
               <tbody>
@@ -29,11 +30,19 @@
                   <td>{{ uf.unidadFuncional }}</td>
                   <td>{{ uf.titulo }}</td>
                   <td>{{ uf.apellidoPropietario }}</td>
-                  <td>${{ uf.estadoCuentaUfDTO.totalExpensa | currency }}</td>
-                  <td>${{ uf.estadoCuentaUfDTO.saldoFinal | currency }}</td>
+                  <td>{{
+                        uf.estadoCuentaUfDTO.segundoVencimientoActivo ?
+                        currency(uf.estadoCuentaUfDTO.segundoVencimiento) :
+                        currency(uf.estadoCuentaUfDTO.totalExpensa) }}</td>
+                  <td>{{ totalPagoUfLista(uf.idUf) }}</td>
+                  <td>{{ currency(uf.estadoCuentaUfDTO.saldoFinal) }}</td>
                 </tr>
               </tbody>
             </table>
+          </div>
+          <div v-if="selectedConsorcio">
+            <h4 style="margin-top: 5px; margin-bottom: 5px; font-weight: bold">Total pago:</h4>
+            <p>{{ totalPagoConsorcio }}</p>
           </div>
         </div>
 
@@ -57,28 +66,47 @@
                 : '\u00A0'
             }}
           </h5>
+          <h5 v-if="selectedConsorcio?.segundoVencimiento && selectedUnidadFuncional" style="font-weight: bold;">
+            *Esta unidad funcional
+            {{ selectedUnidadFuncional?.estadoCuentaUfDTO.segundoVencimientoActivo ? 'tiene' : 'NO tiene' }}
+            el segundo vencimiento activo*
+          </h5>
 
           <form @submit.prevent="mostrarModal">
             <div>
               <label>Fecha:</label>
-              <input type="date" v-model="pago.fecha" required />
+              <input
+                type="date"
+                v-model="pago.fecha"
+                required
+                :disabled="!selectedUnidadFuncional"
+              />
             </div>
             <div>
               <label>Pago:</label>
-              <input type="number" v-model="pago.valor" required min="0" step="0.01" />
+              <input
+                type="number"
+                v-model="pago.valor"
+                required
+                min="0"
+                step="0.01"
+                :disabled="!selectedUnidadFuncional"
+              />
             </div>
             <div>
               <label>Forma de Pago:</label>
-              <select v-model="pago.formaPago" required>
+              <select v-model="pago.formaPago" required :disabled="!selectedUnidadFuncional">
                 <option value="EFECTIVO">Efectivo</option>
                 <option value="BANCO">Banco</option>
               </select>
             </div>
             <div>
               <label>Descripción:</label>
-              <textarea v-model="pago.descripcion"></textarea>
+              <textarea v-model="pago.descripcion" :disabled="!selectedUnidadFuncional"></textarea>
             </div>
-            <button type="submit" class="btn btn-success">Registrar</button>
+            <button type="submit" class="btn btn-success" :disabled="!selectedUnidadFuncional">
+              Registrar
+            </button>
           </form>
 
           <!-- Modal -->
@@ -165,12 +193,18 @@
               <tbody>
                 <tr v-for="pago in pagosUf" :key="pago.id">
                   <td>{{ pago.fecha }}</td>
-                  <td>${{ pago.valor }}</td>
+                  <td>{{ currency(pago.valor) }}</td>
                   <td>{{ pago.descripcion }}</td>
                 </tr>
               </tbody>
             </table>
-            <button style="margin-top: 5px" @click="limpiarPagos()">Limpiar pagos</button>
+            <button
+              style="margin-top: 5px"
+              @click="limpiarPagos()"
+              :disabled="!selectedUnidadFuncional"
+            >
+              Limpiar pagos
+            </button>
           </div>
         </div>
       </div>
@@ -185,30 +219,38 @@
               <th>C</th>
               <th>D</th>
               <th>E</th>
-              <th>Gasto Particular</th>
-              <th>Total a pagar</th>
+              <th>G.P.</th>
+              <th>Total</th>
+              <th v-if="selectedConsorcio?.segundoVencimiento">2° VTO</th>
               <th>Total pago</th>
               <th>Saldo Final</th>
             </tr>
           </thead>
           <tbody>
             <tr>
-              <td>$ {{ selectedUnidadFuncional.estadoCuentaUfDTO.deuda }}</td>
-              <td>$ {{ selectedUnidadFuncional.estadoCuentaUfDTO.intereses }}</td>
-              <td>$ {{ selectedUnidadFuncional.estadoCuentaUfDTO.totalA }}</td>
-              <td>$ {{ selectedUnidadFuncional.estadoCuentaUfDTO.totalB }}</td>
-              <td>$ {{ selectedUnidadFuncional.estadoCuentaUfDTO.totalC }}</td>
-              <td>$ {{ selectedUnidadFuncional.estadoCuentaUfDTO.totalD }}</td>
-              <td>$ {{ selectedUnidadFuncional.estadoCuentaUfDTO.totalE }}</td>
-              <td>$ {{ selectedUnidadFuncional.estadoCuentaUfDTO.gastoParticular }}</td>
-              <td>$ {{ selectedUnidadFuncional.estadoCuentaUfDTO.totalExpensa }}</td>
-              <td>$ {{ totalPago }}</td>
-              <td>$ {{ selectedUnidadFuncional.estadoCuentaUfDTO.saldoFinal }}</td>
+              <td>{{ currency(selectedUnidadFuncional.estadoCuentaUfDTO.deuda) }}</td>
+              <td>{{ currency(selectedUnidadFuncional.estadoCuentaUfDTO.intereses) }}</td>
+              <td>{{ currency(selectedUnidadFuncional.estadoCuentaUfDTO.totalA) }}</td>
+              <td>{{ currency(selectedUnidadFuncional.estadoCuentaUfDTO.totalB) }}</td>
+              <td>{{ currency(selectedUnidadFuncional.estadoCuentaUfDTO.totalC) }}</td>
+              <td>{{ currency(selectedUnidadFuncional.estadoCuentaUfDTO.totalD) }}</td>
+              <td>{{ currency(selectedUnidadFuncional.estadoCuentaUfDTO.totalE) }}</td>
+              <td>{{ currency(selectedUnidadFuncional.estadoCuentaUfDTO.gastoParticular) }}</td>
+              <td>{{ currency(selectedUnidadFuncional.estadoCuentaUfDTO.totalExpensa) }}</td>
+              <td v-if="selectedConsorcio?.segundoVencimiento">
+                {{
+                  selectedUnidadFuncional.estadoCuentaUfDTO.segundoVencimiento !== 0 &&
+                  selectedUnidadFuncional.estadoCuentaUfDTO.segundoVencimiento !== null
+                    ? currency(selectedUnidadFuncional.estadoCuentaUfDTO.segundoVencimiento)
+                    : currency(0)
+                }}
+              </td>
+              <td>{{ totalPagoUf }}</td>
+              <td>{{ currency(selectedUnidadFuncional.estadoCuentaUfDTO.saldoFinal) }}</td>
             </tr>
           </tbody>
         </table>
       </div>
-      <!-- Estado cuenta unidad funcional -->
     </div>
   </div>
 </template>
@@ -221,7 +263,7 @@ import axios from 'axios'
 import { API_UF } from '@renderer/config/config'
 import { useAdminStore } from '@renderer/stores/adminStore'
 import { useIntermediaStore } from '@renderer/stores/intermediaStore'
-import { showErrorDialog } from '../utils/dialogs'
+import { showConfirmDialog, showErrorDialog } from '../utils/dialogs'
 
 const adminStore = useAdminStore()
 const consorcioStore = useConsorcioStore()
@@ -231,8 +273,10 @@ const selectedConsorcio = computed(() => consorcioStore.selectedConsorcio)
 const unidadesFuncionales = ref([])
 const selectedUnidadFuncional = ref(null)
 const estadoCuentaConsorcio = ref(null)
+const pagos = ref([])
 const pagosUf = ref([])
-const totalPago = ref('')
+const totalPagoConsorcio = ref('')
+const totalPagoUf = ref('')
 const mostrarAdvertenciaMail = ref(false)
 const mostrarAdvertenciaImpresion = ref(false)
 const mostrarAdv = ref(false)
@@ -305,17 +349,23 @@ function confirmarAccion() {
 
 // Observar cambios en el consorcio seleccionado
 watch(selectedConsorcio, async (newConsorcio) => {
+  totalPagoConsorcio.value = currency(0)
   if (newConsorcio) {
     try {
-      await Promise.all([cargarUnidadesFuncionales(), cargarEstadoCuentaConsorcio()])
+      await Promise.all([
+        cargarUnidadesFuncionales(),
+        cargarEstadoCuentaConsorcio(),
+        cargarPagosConsorcio()
+      ])
       selectedUnidadFuncional.value = null
-      console.log(JSON.stringify(pagoRequest.value))
       pagosUf.value = null
+      console.log(JSON.stringify(selectUnidadFuncional.value))
     } catch (error) {
       console.error('Error al cargar las unidades funcionales:', error)
     }
   }
 })
+
 // Observar cambios eleccion de impresion o envio mail
 watch(accionSeleccionada, (nuevaAccion) => {
   pagoRequest.value.imprimir = nuevaAccion === 'imprimir'
@@ -323,18 +373,50 @@ watch(accionSeleccionada, (nuevaAccion) => {
 })
 
 // seleccionar unidad funcional
-const selectUnidadFuncional = (unidadFuncional) => {
+const selectUnidadFuncional = async (unidadFuncional) => {
+  if (selectedConsorcio.value.segundoVencimiento) {
+    const today = new Date()
+    const dia = String(today.getDate()).padStart(2, '0')
+    const mes = String(today.getMonth() + 1).padStart(2, '0')
+    if (!unidadFuncional.estadoCuentaUfDTO.segundoVencimientoActivo && dia > 10) {
+      const activate = await showConfirmDialog(
+        `La fecha actual es ${dia}/${mes} y la unidad funcional NO tiene activado el segundo vencimiento.\n\nTotal actual: ${currency(unidadFuncional.estadoCuentaUfDTO.totalExpensa)}\nSegundo Vencimiento: ${currency(unidadFuncional.estadoCuentaUfDTO.segundoVencimiento)}\n\nDesea activarlo?`
+      )
+
+      if (activate) {
+        try {
+          await axios.post(
+            `http://192.168.0.1:8080/api/estado_cuenta_uf/imputarSegundoVencimiento/${unidadFuncional.estadoCuentaUfDTO.idEstadoCuentaUf}`
+          )
+          window.api.alert("Segundo vencimiento activado.")
+
+          await Promise.all([
+            actualizarUnidadFuncional(unidadFuncional.idUf),
+            cargarUnidadesFuncionales(),
+            cargarEstadoCuentaConsorcio(),
+            cargarPagosUf(unidadFuncional.idUf)
+          ])
+        } catch (error) {
+          console.error('Error al activar segundo vencimiento:', error)
+          showErrorDialog(error)
+        }
+      }
+
+    } else {
+      window.api.alert("La unidad funcional ya tiene el segundo vencimiento activo.")
+    }
+  }
+
+  // Esta parte siempre se ejecuta
   selectedUnidadFuncional.value = unidadFuncional
-  console.warn('PAGO')
-  console.log(JSON.stringify(pago.value))
   pago.value.idUf = unidadFuncional.idUf
   pago.value.idConsorcio = selectedConsorcio.value.idConsorcio
-  ;(pago.value.idExpensa = intermediaStore.selectedIntermedia?.idExpensa),
-    (pago.value.periodo = intermediaStore.selectedIntermedia?.periodo)
-  console.warn('PAGO')
-  console.log(JSON.stringify(pago.value))
-  cargarPagosUf(selectedUnidadFuncional.value.idUf)
+  pago.value.idExpensa = intermediaStore.selectedIntermedia?.idExpensa
+  pago.value.periodo = intermediaStore.selectedIntermedia?.periodo
+
+  cargarPagosUf(unidadFuncional.idUf)
 }
+
 
 // cargar su estado de cuenta
 const cargarEstadoCuentaConsorcio = async () => {
@@ -349,31 +431,40 @@ const cargarEstadoCuentaConsorcio = async () => {
   }
 }
 
-// cargar sus pagos
-const cargarPagosUf = async (idUf) => {
-  if (!idUf) {
-    console.warn('ID de Unidad Funcional no válido.')
-    return
-  }
-
+// CARGAR PAGOS CONSORCIO
+const cargarPagosConsorcio = async () => {
   try {
     const response = await axios.get(
-      `http://192.168.0.1:8080/api/pagoUF/unidadFuncional/${idUf}/periodo/${intermediaStore.selectedIntermedia.periodo}`
+      `http://192.168.0.1:8080/api/pagoUF/consorcio/${consorcioStore.selectedConsorcio.idConsorcio}`
     )
-
-    if (response.data && Array.isArray(response.data)) {
-      pagosUf.value = response.data
-      totalPago.value = sumarPagos(pagosUf.value)
-    } else {
-      console.warn('No se encontraron pagos para la Unidad Funcional especificada.')
-      pagosUf.value = [] // Vaciar la lista en caso de que no haya resultados.
-      totalPago.value = 0
+    if (Array.isArray(response.data)) {
+      pagos.value = response.data
+      totalPagoConsorcio.value = sumarPagos(pagos.value)
     }
   } catch (error) {
-    console.error('Error al cargar los pagos de la unidad funcional:', error)
-    window.api.alert('Hubo un problema al cargar los pagos. Inténtalo nuevamente más tarde.')
+    console.error('Error al cargar los pagos del consorcio:', error)
     showErrorDialog(error)
   }
+}
+
+// cargar sus pagos
+const cargarPagosUf = (idUf) => {
+  pagosUf.value = pagos.value.filter((p) => p.idUf === idUf)
+  totalPagoUf.value = sumarPagos(pagosUf.value)
+}
+
+// PAGOS UFS POR FILA
+const totalPagoUfLista = (idUf) => {
+  if (!Array.isArray(pagos.value)) return '$0,00'
+
+  const total = pagos.value
+    .filter((p) => p.idUf === idUf)
+    .reduce((sum, pago) => sum + pago.valor, 0)
+
+  return total.toLocaleString('es-AR', {
+    style: 'currency',
+    currency: 'ARS'
+  })
 }
 
 const sumarPagos = (pagosUf) => {
@@ -381,14 +472,15 @@ const sumarPagos = (pagosUf) => {
   for (const pago of pagosUf) {
     total += pago.valor
   }
-  return total
+  return total.toLocaleString('es-AR', {
+    style: 'currency',
+    currency: 'ARS'
+  })
 }
 
 // Función para registrar el pago
 const crearPago = async () => {
-  console.log(JSON.stringify(pago.value))
 
-  console.log(JSON.stringify(pagoRequest.value))
   try {
     if (pagoRequest.value.imprimir) {
       mostrarAdvertenciaImpresion.value = true
@@ -399,7 +491,6 @@ const crearPago = async () => {
     }
 
     pagoRequest.value.pago = pago.value
-    console.log(JSON.stringify(pagoRequest.value))
 
     await axios.post('http://192.168.0.1:8080/api/pagoUF', pagoRequest.value)
     window.api.alert('Pago realizado con éxito!')
@@ -499,7 +590,7 @@ const actualizarUnidadFuncional = async (idUf) => {
 
 // Filtro para formatear como moneda
 const currency = (value) => {
-  if (!value) return '$0.00'
+  if (value === null || value === undefined) return '$0.00'
   return new Intl.NumberFormat('es-AR', {
     style: 'currency',
     currency: 'ARS'
@@ -531,7 +622,6 @@ const limpiarAdv = () => {
 }
 
 onMounted(() => {
-  console.log(JSON.stringify(pagoRequest.value))
   mostrarAdvertenciaImpresion.value = false
   mostrarAdvertenciaMail.value = false
 })
@@ -563,7 +653,7 @@ onUnmounted(() => {
 .contenido-pagos {
   display: flex;
   gap: 20px;
-  width: 90%;
+  width: 100%;
   height: 60vh;
   justify-content: space-between;
   align-items: stretch;
@@ -576,7 +666,7 @@ onUnmounted(() => {
 .unidades-funcionales,
 .formulario-pagos,
 .tabla-pagos {
-  width: 30%;
+  width: 40%;
   padding: 10px;
   box-sizing: border-box;
   display: flex;
@@ -649,6 +739,16 @@ onUnmounted(() => {
   background-color: #885b21e0;
 }
 
+.formulario-pagos input:disabled,
+.formulario-pagos select:disabled,
+.formulario-pagos textarea:disabled,
+.formulario-pagos button:disabled {
+  color: #666; /* texto más tenue */
+  cursor: not-allowed; /* icono de "prohibido" al pasar el mouse */
+  opacity: 0.6; /* más opaco */
+  border: 1px solid #999; /* borde más tenue */
+}
+
 /* === TABLAS === */
 .table {
   width: 100%;
@@ -656,16 +756,17 @@ onUnmounted(() => {
   background-color: #ffffffe0;
 }
 
+.table th,
+.table td {
+  border: 1px solid black;
+  padding: 8px;
+  text-align: left;
+}
+
 .table th {
   font-weight: bold;
   background-color: var(--sumerio-marron);
-}
-
-.table th,
-.table td {
-  border: 1px solid #ddd;
-  padding: 8px;
-  text-align: left;
+  text-align: center;
 }
 
 .table tr:hover {
@@ -673,8 +774,9 @@ onUnmounted(() => {
 }
 
 .table tr.selected {
-  background-color: #e0f7fa;
-  border-color: #00796b;
+  background-color: var(--sumerio-crema);
+  border: 2px solid var(--sumerio-rojo-claro);
+  font-weight: bold;
 }
 
 /* === TABLA SCROLL === */
@@ -713,9 +815,38 @@ onUnmounted(() => {
   border-collapse: collapse;
 }
 
+.unidades-funcionales table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+
+.unidades-funcionales thead th {
+  position: sticky;
+  top: 0;
+  z-index: 2; /* asegura que quede por encima */
+  border-bottom: 2px solid #ccc;
+}
+
+.unidades-funcionales th,
+.unidades-funcionales td {
+  overflow: hidden;
+  border: 1px solid black;
+  margin: 0;
+  padding: 8px;
+  max-width: 70px;
+  font-size: clamp(10px, 1.5vw, 12px);
+}
+
+.tabla-pagos .table tr,
+.unidades-funcionales .table tr {
+  height: 40px;
+  max-height: 40px;
+}
+
 /* === ESTADO DE CUENTA === */
 .estado-cuenta {
-  width: 90%;
+  width: 100%;
   margin: 0 auto;
   padding: 10px;
   box-sizing: border-box;
@@ -738,6 +869,7 @@ onUnmounted(() => {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  height: 20px;
 }
 
 /* === MODAL === */
@@ -768,8 +900,10 @@ onUnmounted(() => {
 .modal h5,
 label,
 input,
-select {
-  margin-top: 10px;
+select,
+textarea {
+  margin-top: 5px;
+  margin-bottom: 10px;
 }
 
 .modal button:not(:first-of-type) {
@@ -854,5 +988,26 @@ select {
   100% {
     transform: rotate(360deg);
   }
+}
+
+.unidades-funcionales th:nth-child(1),
+.unidades-funcionales td:nth-child(1) {
+  width: 8%;
+  max-width: 60px;
+}
+
+.unidades-funcionales th:nth-child(2) {
+  width: 12%;
+  max-width: 60px;
+}
+
+.unidades-funcionales th:nth-child(3) {
+  width: 20%;
+}
+
+.unidades-funcionales th:nth-child(4),
+.unidades-funcionales th:nth-child(5),
+.unidades-funcionales th:nth-child(6) {
+  width: 20%;
 }
 </style>

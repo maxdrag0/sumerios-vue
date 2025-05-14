@@ -848,7 +848,7 @@ h3 {
 .listado-unidades::-webkit-scrollbar-thumb {
   background-color: var(--sumerio-marron); /* color del scroll "thumb" */
   border-radius: 4px;
-  border: 1px solid #573b27; /* borde opcional */
+  border: 1px solid #573b27;
 }
 
 .listado-unidades::-webkit-scrollbar-thumb:hover {
