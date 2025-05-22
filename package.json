@@ -31,7 +31,8 @@
     "pinia": "^2.3.0",
     "standard": "^17.1.2",
     "vue-router": "^4.5.0",
-    "vue3-toastify": "^0.2.8"
+    "vue3-toastify": "^0.2.8",
+    "xlsx": "^0.18.5"
   },
   "devDependencies": {
     "@electron-toolkit/eslint-config": "^1.0.2",

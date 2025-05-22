@@ -46,7 +46,9 @@
             <td>
               {{
                 estadoCuentaActual?.periodo
-                  ? currency(totalPagoPorPeriodo(mostrarSiguientePeriodo(estadoCuentaActual.periodo)))
+                  ? currency(
+                      totalPagoPorPeriodo(mostrarSiguientePeriodo(estadoCuentaActual.periodo))
+                    )
                   : 'N/A'
               }}
             </td>

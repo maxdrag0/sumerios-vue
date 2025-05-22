@@ -131,7 +131,7 @@
                   required
                   step="0.01"
                   min="0"
-                  style="text-align: center;"
+                  style="text-align: center"
                 />
               </div>
 
@@ -157,7 +157,7 @@
                   required
                   step="0.01"
                   min="0"
-                  style="text-align: center;"
+                  style="text-align: center"
                 />
               </div>
             </div>
@@ -226,7 +226,7 @@ const obtenerConsorcios = async () => {
 
 // Función para seleccionar un consorcio y redirigir a la vista de edición
 const selectConsorcio = (consorcio) => {
-  consorcioSeleccionado.value = consorcio;
+  consorcioSeleccionado.value = consorcio
   console.log(JSON.stringify(consorcioSeleccionado.value))
   banderaSeleccion.value = true
 }

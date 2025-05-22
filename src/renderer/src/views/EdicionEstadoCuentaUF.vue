@@ -76,7 +76,11 @@
           </div>
           <div v-if="consorcio.segundoVencimiento">
             <label for="segundoVencimiento">Segundo Vencimiento:</label>
-            <input id="segundoVencimiento" type="number" v-model="estadoCuentaUf.segundoVencimiento" />
+            <input
+              id="segundoVencimiento"
+              type="number"
+              v-model="estadoCuentaUf.segundoVencimiento"
+            />
           </div>
           <div class="form-actions">
             <button type="submit">Guardar Cambios</button>

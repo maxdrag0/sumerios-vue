@@ -1,10 +1,6 @@
 <template>
   <div class="container-view">
-    <!-- <h1>Crear Unidades Funcionales - {{ consorcio.nombre }} : {{ consorcio.direccion }}</h1> -->
-
-    <!-- Contenedor para el listado y el formulario -->
     <div class="container">
-      <!-- Listado de Unidades Funcionales -->
       <div class="listado-unidades">
         <table>
           <thead>
@@ -29,7 +25,22 @@
             </tr>
           </tbody>
         </table>
-        <h3>Porcentaje total = {{ porcentajeTotalUF }}</h3>
+        <h3 v-if="unidades.length > 0 ">Porcentaje total = {{ porcentajeTotalUF }}</h3>
+        <div v-else class="excel">
+          <img
+            src="@renderer/assets/excel-icon.png"
+            alt="Excel"
+            class="excel-img"
+            @click="triggerFileInput"
+          />
+          <input
+            type="file"
+            ref="inputExcel"
+            @change="handleFileUpload"
+            accept=".xlsx, .xls"
+            class="input-hidden"
+          />
+        </div>
       </div>
 
       <!-- Formulario para crear Unidades Funcionales -->
@@ -247,7 +258,7 @@
                   id="porcentajeUnidad"
                   class="form-control"
                   required
-                  step="0.01"
+                  step="0.0001"
                   min="0"
                   max="100"
                 />
@@ -262,7 +273,7 @@
                   id="porcentajeUnidad"
                   class="form-control"
                   required
-                  step="0.01"
+                  step="0.0001"
                   min="0"
                   max="100"
                 />
@@ -277,7 +288,7 @@
                   id="porcentajeUnidad"
                   class="form-control"
                   required
-                  step="0.01"
+                  step="0.0001"
                   min="0"
                   max="100"
                 />
@@ -292,7 +303,7 @@
                   id="porcentajeUnidad"
                   class="form-control"
                   required
-                  step="0.01"
+                  step="0.0001"
                   min="0"
                   max="100"
                 />
@@ -307,7 +318,7 @@
                   id="porcentajeUnidad"
                   class="form-control"
                   required
-                  step="0.01"
+                  step="0.0001"
                   min="0"
                   max="100"
                 />
@@ -405,6 +416,7 @@ import { useIntermediaStore } from '@renderer/stores/intermediaStore'
 import { useNavigationGuardStore } from '@renderer/stores/navigationGuardStore'
 import { Decimal } from 'decimal.js'
 import { showErrorDialog } from '../utils/dialogs'
+import * as XLSX from 'xlsx'
 
 // ROUTER
 const route = useRoute()
@@ -442,6 +454,8 @@ const unidad = ref({
   mailInquilino: '',
   telefonoInquilino: ''
 })
+
+
 
 // LISTA DE UF
 const unidades = ref([])
@@ -493,6 +507,63 @@ const obtenerUnidadesFuncionales = async () => {
     unidades.value = [] // Reinicializa en caso de error
   }
 }
+
+const inputExcel = ref(null)
+
+const triggerFileInput = () => {
+  inputExcel.value.click()
+}
+
+const handleFileUpload = async (event) => {
+  const file = event.target.files[0]
+  const data = await file.arrayBuffer()
+  const workbook = XLSX.read(data)
+
+  const sheet = workbook.Sheets[workbook.SheetNames[0]]
+  const json = XLSX.utils.sheet_to_json(sheet)
+
+  // Mapear cada fila del Excel a una unidad funcional
+  unidades.value = json.map(row => ({
+    idConsorcio,
+    unidadFuncional: obtenerValor(row, ['unidadFuncional', 'UF', 'Unidad Funcional']),
+    titulo: obtenerValor(row, ['titulo', 'Título', 'Depto', 'Departamento', 'Depto.', 'DTO']),
+    porcentajeUnidad: obtenerValor(row, ['porcentajeUnidad', '%', 'Porcentaje A'], 'number'),
+    porcentajeUnidadB: obtenerValor(row, ['porcentajeUnidadB', 'Porcentaje B'], 'number'),
+    porcentajeUnidadC: obtenerValor(row, ['porcentajeUnidadC', 'Porcentaje C'], 'number'),
+    porcentajeUnidadD: obtenerValor(row, ['porcentajeUnidadD', 'Porcentaje D'], 'number'),
+    porcentajeUnidadE: obtenerValor(row, ['porcentajeUnidadE', 'Porcentaje E'], 'number'),
+    apellidoPropietario: obtenerValor(row, ['apellidoPropietario', 'Apellido Propietario','Propietario']),
+    nombrePropietario: obtenerValor(row, ['nombrePropietario', 'Nombre Propietario']),
+    mailPropietario: obtenerValor(row, ['mailPropietario', 'Email Propietario', 'Correo Propietario','Mail', 'Mail Propietario']),
+    telefonoPropietario: obtenerValor(row, ['telefonoPropietario', 'Teléfono Propietario', 'Telefono']),
+    apellidoInquilino: obtenerValor(row, ['apellidoInquilino', 'Apellido Inquilino']),
+    nombreInquilino: obtenerValor(row, ['nombreInquilino', 'Nombre Inquilino']),
+    mailInquilino: obtenerValor(row, ['mailInquilino', 'Email Inquilino']),
+    telefonoInquilino: obtenerValor(row, ['telefonoInquilino', 'Teléfono Inquilino'])
+  }))
+
+  for(const unidad of unidades.value){
+    await agregarUnidadFuncionalExcel(unidad)
+  }
+
+  calcularSumaUF()
+}
+
+// Auxiliar: busca el valor en una fila a partir de múltiples posibles encabezados
+function obtenerValor(row, posiblesClaves, tipo = 'string') {
+  for (const clave of posiblesClaves) {
+    if (row.hasOwnProperty(clave)) {
+      const valor = row[clave]
+      if (tipo === 'number') {
+        const num = parseFloat(valor)
+        return isNaN(num) ? 0.0 : parseFloat(num.toFixed(4)) // redondea a 4 decimales
+      }
+      return valor || ''
+    }
+  }
+  return tipo === 'number' ? 0.0 : ''
+}
+
 
 // CALCULA EL TOTAL DEL PORCENTAJE
 const calcularSumaUF = () => {
@@ -619,6 +690,19 @@ const agregarUnidadFuncional = async () => {
   } catch (error) {
     console.error('Error al crear la unidad funcional:', error)
     window.api.alert('Error al crear la unidad funcional:')
+    showErrorDialog(error)
+  }
+}
+
+const agregarUnidadFuncionalExcel = async (unidad) => {
+  try {
+    console.log('Datos a enviar:', JSON.stringify(unidad))
+    const response = await axios.post(apiUF, unidad)
+    console.log('Unidad Funcional creada:', response.data)
+    obtenerUnidadesFuncionales()
+  } catch (error) {
+    console.error('Error al crear la unidad funcional:', error)
+    window.api.alert('Error al crear la unidad funcional')
     showErrorDialog(error)
   }
 }
@@ -968,5 +1052,20 @@ button {
   font-size: 14px;
   border-radius: 6px;
   transition: background-color 0.3s ease;
+}
+
+.excel{
+  margin: 10px 0;
+  position: relative;
+}
+
+.excel img{
+  height: 30px;
+  cursor: pointer;
+}
+
+
+.input-hidden {
+  display: none;
 }
 </style>

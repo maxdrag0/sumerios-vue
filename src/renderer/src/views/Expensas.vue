@@ -4,7 +4,15 @@
       <BotonConsorcio />
     </div>
     <div v-if="consorcioStore.selectedConsorcio">
-      <h2 style="text-align: center; margin-top: 1rem; color: black; font-weight: bold; font-size: 15px">
+      <h2
+        style="
+          text-align: center;
+          margin-top: 1rem;
+          color: black;
+          font-weight: bold;
+          font-size: 15px;
+        "
+      >
         Liquidando período -> {{ intermediaStore.selectedIntermedia?.periodo }}
       </h2>
     </div>
@@ -41,9 +49,7 @@
                 <td>{{ obtenerNombreProveedor(egreso.idProveedor) }}</td>
                 <td style="text-align: right">{{ currency(egreso.totalFinal) }}</td>
                 <td>
-                  <button class="boton-eliminar" @click="eliminarEgreso(egreso.idEgreso)">
-                    X
-                  </button>
+                  <button class="boton-eliminar" @click="eliminarEgreso(egreso.idEgreso)">X</button>
                 </td>
               </tr>
             </tbody>
@@ -80,7 +86,10 @@
                 </td>
                 <td>{{ currency(gasto.totalFinal) }}</td>
                 <td>
-                  <button class="boton-eliminar" @click="eliminarGastoParticular(gasto.idGastoParticular)">
+                  <button
+                    class="boton-eliminar"
+                    @click="eliminarGastoParticular(gasto.idGastoParticular)"
+                  >
                     X
                   </button>
                 </td>
@@ -163,9 +172,9 @@
     </div>
     <transition name="fade">
       <div v-show="mostrarNota" class="nota">
+        <textarea v-model="expensa.expensaCreateDTO.nota"></textarea>
       </div>
     </transition>
-
 
     <div @click="mostrarJuicios = !mostrarJuicios" class="toggle-movimientos">
       JUICIOS
@@ -174,9 +183,9 @@
     </div>
     <transition name="fade">
       <div v-show="mostrarJuicios" class="juicios">
+        <textarea v-model="expensa.expensaCreateDTO.juicios"></textarea>
       </div>
     </transition>
-
 
     <div class="detalle-expensas">
       <div class="repetir">
@@ -185,13 +194,14 @@
       </div>
       <div class="intereses">
         <h3>Intereses por mora:</h3>
+        %
         <input
           type="number"
-          v-model="porcentajeIntereses"
+          v-model="expensa.expensaCreateDTO.porcentajeIntereses"
           placeholder="Porcentaje de intereses"
           min="0"
           step="0.01"
-          style="text-align: center;"
+          style="text-align: right"
         />
       </div>
     </div>
@@ -202,13 +212,14 @@
       </div>
       <div v-show="expensa.segundoVencimiento" class="intereses">
         <h3>Intereses segundoVencimiento:</h3>
+        %
         <input
           type="number"
           v-model="expensa.expensaCreateDTO.porcentajeSegundoVencimiento"
           placeholder="Porcentaje de intereses segundo vencimiento"
           min="0"
           step="0.01"
-          style="text-align: center;"
+          style="text-align: right"
         />
       </div>
     </div>
@@ -238,9 +249,9 @@ const adminStore = useAdminStore()
 const consorcioStore = useConsorcioStore()
 const intermediaStore = useIntermediaStore()
 const authStore = useAuthStore()
-const mostrarMovimientos = ref(false);
-const mostrarNota = ref(false);
-const mostrarJuicios = ref(false);
+const mostrarMovimientos = ref(false)
+const mostrarNota = ref(false)
+const mostrarJuicios = ref(false)
 
 // Referencias reactivas
 const selectedConsorcio = computed(() => consorcioStore.selectedConsorcio)
@@ -264,8 +275,8 @@ const expensa = ref({
     periodo: null,
     porcentajeIntereses: 0,
     porcentajeSegundoVencimiento: 0,
-    nota:'',
-    juicios:''
+    nota: '',
+    juicios: ''
   }
 })
 
@@ -277,17 +288,23 @@ watch(
   }
 )
 
-const porcentajeIntereses = ref(0)
-
 // Watch para actualizar idConsorcio al cambiar el selectedConsorcio en el store
 watch(
   () => consorcioStore.selectedConsorcio,
   (newConsorcio) => {
     if (newConsorcio) {
+      mostrarNota.value = false
+      expensa.value.expensaCreateDTO.nota = ''
+      mostrarJuicios.value = false
+      expensa.value.expensaCreateDTO.juicios = ''
+
       cargarDatos()
       cargarProveedoresAdm()
       cargarUf()
-      // mostrarDatosExpensa()
+
+      expensa.value.expensaCreateDTO.porcentajeIntereses = newConsorcio.porcentajeIntereses
+      expensa.value.segundoVencimiento = newConsorcio.segundoVencimiento
+      expensa.value.expensaCreateDTO.porcentajeSegundoVencimiento = newConsorcio.porcentajeSegundoVencimiento
     }
   }
 )
@@ -387,8 +404,8 @@ const obtenerUnidadFuncional = (idUf) => {
 
 const previsualizarExpensa = async () => {
   try {
-    expensa.value.expensaCreateDTO.porcentajeIntereses = porcentajeIntereses.value
 
+    console.log(JSON.stringify(expensa.value))
     const response = await axios.post(
       `http://192.168.0.1:8080/api/expensas/preview/consorcio/${consorcioStore.selectedConsorcio?.idConsorcio}`,
       expensa.value,
@@ -453,8 +470,6 @@ const previsualizarExpensa = async () => {
 
 const liquidarExpensa = async () => {
   try {
-    expensa.value.expensaCreateDTO.porcentajeIntereses = porcentajeIntereses.value
-
     // Enviar solicitud con headers y responseType 'blob'
     const response = await axios.post(
       `http://192.168.0.1:8080/api/expensas/consorcio/${consorcioStore.selectedConsorcio?.idConsorcio}`,
@@ -541,7 +556,6 @@ const restablecerPeriodo = async () => {
             porcentajeSegundoVencimiento: 0
           }
         }
-        porcentajeIntereses.value = 0
         consorcioStore.setConsorcio(null)
 
         recargarVista()
@@ -578,11 +592,10 @@ const limpiarValores = () => {
       periodo: null,
       porcentajeIntereses: 0,
       porcentajeSegundoVencimiento: 0,
-      nota:'',
-      juicios:''
+      nota: '',
+      juicios: ''
     }
   }
-  porcentajeIntereses.value = 0
 }
 
 const currency = (value) => {
@@ -696,6 +709,8 @@ tbody tr:nth-child(even) {
   display: flex;
   margin-top: 10px;
   margin-bottom: 10px;
+  transition: all 0.3s ease;
+  min-height: 60px;
 }
 
 .detalle-expensas div {
@@ -728,7 +743,7 @@ button:hover {
   text-align: left;
 }
 
-.intereses{
+.intereses {
   text-align: right;
 }
 
@@ -736,15 +751,14 @@ button:hover {
   text-align: center;
 }
 
-.boton-eliminar{
+.boton-eliminar {
   border-radius: 20%;
   background-color: rgb(220, 34, 34);
   font-size: 10px;
 }
 
-.boton-eliminar:hover{
+.boton-eliminar:hover {
   background-color: rgb(186, 31, 31);
-
 }
 
 .toggle-movimientos {
@@ -780,5 +794,18 @@ button:hover {
 .fade-enter-to,
 .fade-leave-from {
   opacity: 1;
+}
+
+input[type='number'] {
+  text-align: right;
+  width: 100%;
+  max-width: 50px;
+  margin-top: 0.5rem;
+}
+
+.nota textarea,
+.juicios textarea {
+  width: 100%;
+  min-height: 200px;
 }
 </style>
